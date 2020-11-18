@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:monitor_orgadmin/ui/users/user_edit_main.dart';
 import 'package:monitorlibrary/bloc/monitor_bloc.dart';
 import 'package:monitorlibrary/data/user.dart';
 import 'package:monitorlibrary/functions.dart';
+import 'package:page_transition/page_transition.dart';
 
 class UserListMobile extends StatefulWidget {
   final User user;
@@ -59,11 +61,15 @@ class _UserListMobileState extends State<UserListMobile>
                 actions: [
                   IconButton(
                     icon: Icon(Icons.refresh),
-                    onPressed: () {},
+                    onPressed: () {
+                      _getData();
+                    },
                   ),
                   IconButton(
                     icon: Icon(Icons.add),
-                    onPressed: () {},
+                    onPressed: () {
+                      _navigateToUserEdit(null);
+                    },
                   ),
                 ],
                 bottom: PreferredSize(
@@ -118,22 +124,27 @@ class _UserListMobileState extends State<UserListMobile>
                         itemCount: _users.length,
                         itemBuilder: (BuildContext context, int index) {
                           var user = _users.elementAt(index);
-                          return Card(
-                            elevation: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListTile(
-                                leading: Icon(
-                                  Icons.person,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                subtitle: Text(
-                                  user.email,
-                                  style: Styles.greyLabelSmall,
-                                ),
-                                title: Text(
-                                  user.name,
-                                  style: Styles.blackBoldSmall,
+                          return GestureDetector(
+                            onTap: () {
+                              _navigateToUserEdit(user);
+                            },
+                            child: Card(
+                              elevation: 2,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListTile(
+                                  leading: Icon(
+                                    Icons.person,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  subtitle: Text(
+                                    user.email,
+                                    style: Styles.greyLabelSmall,
+                                  ),
+                                  title: Text(
+                                    user.name,
+                                    style: Styles.blackBoldSmall,
+                                  ),
                                 ),
                               ),
                             ),
@@ -144,5 +155,15 @@ class _UserListMobileState extends State<UserListMobile>
             );
           }),
     );
+  }
+
+  void _navigateToUserEdit(User user) {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.scale,
+            alignment: Alignment.topLeft,
+            duration: Duration(seconds: 1),
+            child: UserEditMain(user)));
   }
 }
