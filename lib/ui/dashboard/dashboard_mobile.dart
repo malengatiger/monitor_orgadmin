@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:monitor_orgadmin/ui/users/user_list_main.dart';
 import 'package:monitorlibrary/bloc/monitor_bloc.dart';
 import 'package:monitorlibrary/bloc/theme_bloc.dart';
 import 'package:monitorlibrary/data/photo.dart';
@@ -29,12 +32,17 @@ class _DashboardMobileState extends State<DashboardMobile>
     _controller = AnimationController(vsync: this);
     super.initState();
     _setItems();
+    _listen();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+    projectStreamSubscription.cancel();
+    userStreamSubscription.cancel();
+    photoStreamSubscription.cancel();
+    videoStreamSubscription.cancel();
   }
 
   var items = List<BottomNavigationBarItem>();
@@ -51,170 +59,150 @@ class _DashboardMobileState extends State<DashboardMobile>
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.user.name, style: Styles.whiteSmall),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () {
-                themeBloc.changeToRandomTheme();
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.location_on),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.map_outlined),
-              onPressed: () {},
-            ),
-          ],
-          bottom: PreferredSize(
-            child: Column(
-              children: [
-                Text(
-                  widget.user.organizationName,
-                  style: Styles.whiteBoldSmall,
-                ),
-                SizedBox(
-                  height: 48,
-                )
-              ],
-            ),
-            preferredSize: Size.fromHeight(200),
-          ),
-        ),
-        backgroundColor: Colors.brown[100],
-        bottomNavigationBar: BottomNavigationBar(
-          items: items,
-          onTap: _handleBottomNav,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+          appBar: AppBar(
+            title: Text(widget.user.name, style: Styles.whiteSmall),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.settings),
+                onPressed: () {
+                  themeBloc.changeToRandomTheme();
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.location_on),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: Icon(Icons.map_outlined),
+                onPressed: () {},
+              ),
+            ],
+            bottom: PreferredSize(
               child: Column(
                 children: [
-                  SizedBox(
-                    height: 48,
+                  Text(
+                    widget.user.organizationName,
+                    style: Styles.whiteBoldSmall,
                   ),
-                  StreamBuilder<List<Project>>(
-                      stream: monitorBloc.projectStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          _projects = snapshot.data;
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Number of Projects: ',
-                                style: Styles.greyLabelSmall,
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Text(
-                                '${_projects.length}',
-                                style: Styles.blackBoldMedium,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
                   SizedBox(
-                    height: 28,
+                    height: 8,
                   ),
-                  StreamBuilder<List<User>>(
-                      stream: monitorBloc.usersStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          _users = snapshot.data;
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Number of Personnel: ',
-                                style: Styles.greyLabelSmall,
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Text(
-                                '${_users.length}',
-                                style: Styles.blackBoldMedium,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                  Text(
+                    'Administrator',
+                    style: Styles.blackSmall,
+                  ),
                   SizedBox(
-                    height: 28,
-                  ),
-                  StreamBuilder<List<Photo>>(
-                      stream: monitorBloc.photoStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          _photos = snapshot.data;
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Number of Photos: ',
-                                style: Styles.greyLabelSmall,
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Text(
-                                '${_photos.length}',
-                                style: Styles.blackBoldMedium,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                  SizedBox(
-                    height: 28,
-                  ),
-                  StreamBuilder<List<Video>>(
-                      stream: monitorBloc.videoStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          _videos = snapshot.data;
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Number of Videos: ',
-                                style: Styles.greyLabelSmall,
-                              ),
-                              SizedBox(
-                                width: 12,
-                              ),
-                              Text(
-                                '${_videos.length}',
-                                style: Styles.blackBoldMedium,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                    height: 24,
+                  )
                 ],
               ),
+              preferredSize: Size.fromHeight(100),
             ),
           ),
-        ),
-      ),
+          backgroundColor: Colors.brown[100],
+          bottomNavigationBar: BottomNavigationBar(
+            items: items,
+            onTap: _handleBottomNav,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: GridView.count(
+              crossAxisCount: 2,
+              children: [
+                Container(
+                  child: Card(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 48,
+                        ),
+                        Text(
+                          '${_projects.length}',
+                          style: Styles.blackBoldLarge,
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          'Projects',
+                          style: Styles.greyLabelSmall,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  child: GestureDetector(
+                    onTap: _navigateToUserList,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 48,
+                          ),
+                          Text(
+                            '${_users.length}',
+                            style: Styles.blackBoldLarge,
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            'Users',
+                            style: Styles.greyLabelSmall,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  child: Card(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 48,
+                        ),
+                        Text(
+                          '${_photos.length}',
+                          style: Styles.blackBoldLarge,
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          'Photos',
+                          style: Styles.greyLabelSmall,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  child: Card(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 48,
+                        ),
+                        Text(
+                          '${_videos.length}',
+                          style: Styles.blackBoldLarge,
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          'Videos',
+                          style: Styles.greyLabelSmall,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )),
     );
   }
 
@@ -222,6 +210,7 @@ class _DashboardMobileState extends State<DashboardMobile>
     switch (value) {
       case 0:
         pp(' 🔆🔆🔆 Navigate to MonitorList');
+        _navigateToUserList();
         break;
       case 1:
         pp(' 🔆🔆🔆 Navigate to ProjectList');
@@ -237,5 +226,48 @@ class _DashboardMobileState extends State<DashboardMobile>
         pp(' 🔆🔆🔆 Navigate to MediaList');
         break;
     }
+  }
+
+  void _navigateToUserList() {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.scale,
+            alignment: Alignment.topLeft,
+            duration: Duration(seconds: 1),
+            child: UserListMain()));
+  }
+
+  StreamSubscription<List<Project>> projectStreamSubscription;
+  StreamSubscription<List<User>> userStreamSubscription;
+  StreamSubscription<List<Photo>> photoStreamSubscription;
+  StreamSubscription<List<Video>> videoStreamSubscription;
+
+  void _listen() async {
+    pp('🔆 🔆 🔆 🔆 Listening to streams from monitorBloc ....');
+    projectStreamSubscription = monitorBloc.projectStream.listen((value) {
+      pp('🔆 🔆 🔆 Projects from stream controller: 🌽 ${value.length}');
+      setState(() {
+        _projects = value;
+      });
+    });
+    userStreamSubscription = monitorBloc.usersStream.listen((value) {
+      pp('🔆 🔆 🔆 Users from stream controller: 💜 ${value.length}');
+      setState(() {
+        _users = value;
+      });
+    });
+    photoStreamSubscription = monitorBloc.photoStream.listen((value) {
+      pp('🔆 🔆 🔆 Photos from stream controller: 💙 ${value.length}');
+      setState(() {
+        _photos = value;
+      });
+    });
+    videoStreamSubscription = monitorBloc.videoStream.listen((value) {
+      pp('🔆 🔆 🔆 Videos from stream controller: 🏈 ${value.length}');
+      setState(() {
+        _videos = value;
+      });
+    });
   }
 }
