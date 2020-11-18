@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:monitorlibrary/api/sharedprefs.dart';
+import 'package:monitorlibrary/bloc/admin_bloc.dart';
 import 'package:monitorlibrary/data/user.dart';
 import 'package:monitorlibrary/functions.dart';
 
@@ -17,12 +19,19 @@ class _UserEditMobileState extends State<UserEditMobile>
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var cellphoneController = TextEditingController();
+  User admin;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     _controller = AnimationController(vsync: this);
     super.initState();
     _setup();
+    _getUser();
+  }
+
+  void _getUser() async {
+    admin = await Prefs.getUser();
   }
 
   void _setup() {
@@ -40,9 +49,27 @@ class _UserEditMobileState extends State<UserEditMobile>
   }
 
   void _submit() async {
-    pp('😡 😡 😡 _submit ......... ');
-    if (widget.user == null) {
-    } else {}
+    if (_formKey.currentState.validate()) {
+      if (widget.user == null) {
+        pp('😡 😡 😡 _submit new user ......... ');
+        var user = User(
+            name: nameController.text,
+            email: emailController.text,
+            cellphone: cellphoneController.text,
+            organizationId: admin.organizationId,
+            organizationName: admin.organizationName,
+            userType: type,
+            created: DateTime.now().toIso8601String());
+        await adminBloc.addUser(user);
+      } else {
+        pp('😡 😡 😡 _submit existing user for update, soon! 🌸 ......... ');
+        widget.user.name = nameController.text;
+        widget.user.email = emailController.text;
+        widget.user.cellphone = cellphoneController.text;
+        widget.user.userType = type;
+        await adminBloc.updateUser(widget.user);
+      }
+    }
   }
 
   int userType = -1;
@@ -78,133 +105,133 @@ class _UserEditMobileState extends State<UserEditMobile>
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: nameController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.person),
-                          labelText: 'Name',
-                          hintText: 'Enter Full Name'),
-                    ),
-                    SizedBox(
-                      height: 4,
-                    ),
-                    TextFormField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.email_outlined),
-                          labelText: 'Email Address',
-                          hintText: 'Enter Email Address'),
-                    ),
-                    SizedBox(
-                      height: 4,
-                    ),
-                    TextFormField(
-                      controller: cellphoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.phone),
-                          labelText: 'Cellphone',
-                          hintText: 'Cellphone'),
-                    ),
-                    SizedBox(
-                      height: 4,
-                    ),
-                    widget.user == null
-                        ? TextFormField(
-                            controller: passwordController,
-                            keyboardType: TextInputType.text,
-                            obscureText: false,
-                            decoration: InputDecoration(
-                                icon: Icon(Icons.person),
-                                labelText: 'Password',
-                                hintText: 'Password'),
-                          )
-                        : Container(),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    // Row(
-                    //   children: [
-                    //     Text(
-                    //       'Select User Type Below:',
-                    //       style: Styles.blackBoldSmall,
-                    //     ),
-                    //   ],
-                    // ),
-                    // SizedBox(
-                    //   height: 4,
-                    // ),
-                    // DropdownButton(
-                    //   onChanged: (value) {
-                    //     userType = value;
-                    //   },
-                    //   items: [
-                    //     DropdownMenuItem(
-                    //       child: Text(''),
-                    //     ),
-                    //     DropdownMenuItem(
-                    //       child: Text(FIELD_MONITOR),
-                    //     ),
-                    //     DropdownMenuItem(
-                    //       child: Text(ORG_ADMINISTRATOR),
-                    //     ),
-                    //     DropdownMenuItem(
-                    //       child: Text(ORG_EXECUTIVE),
-                    //     ),
-                    //   ],
-                    // ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Radio(
-                          value: 0,
-                          groupValue: userType,
-                          onChanged: _handleRadioValueChange,
-                        ),
-                        Text(
-                          'Monitor',
-                          style: Styles.blackTiny,
-                        ),
-                        Radio(
-                          value: 1,
-                          groupValue: userType,
-                          onChanged: _handleRadioValueChange,
-                        ),
-                        Text('Admin', style: Styles.blackTiny),
-                        Radio(
-                          value: 2,
-                          groupValue: userType,
-                          onChanged: _handleRadioValueChange,
-                        ),
-                        Text(
-                          'Executive',
-                          style: Styles.blackTiny,
-                        ),
-                      ],
-                    ),
-                    Text(type == null ? '' : type),
-                    SizedBox(
-                      height: 16,
-                    ),
-                    RaisedButton(
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          'Submit',
-                          style: Styles.whiteSmall,
-                        ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            icon: Icon(Icons.person),
+                            labelText: 'Name',
+                            hintText: 'Enter Full Name'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter full name';
+                          }
+                          return value;
+                        },
                       ),
-                      onPressed: _submit,
-                    ),
-                    SizedBox(
-                      height: 40,
-                    ),
-                  ],
+                      SizedBox(
+                        height: 4,
+                      ),
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                            icon: Icon(Icons.email_outlined),
+                            labelText: 'Email Address',
+                            hintText: 'Enter Email Address'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter email address';
+                          }
+                          return value;
+                        },
+                      ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      TextFormField(
+                        controller: cellphoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                            icon: Icon(Icons.phone),
+                            labelText: 'Cellphone',
+                            hintText: 'Cellphone'),
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter cellphone number';
+                          }
+                          return value;
+                        },
+                      ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      widget.user == null
+                          ? TextFormField(
+                              controller: passwordController,
+                              keyboardType: TextInputType.text,
+                              obscureText: false,
+                              decoration: InputDecoration(
+                                  icon: Icon(Icons.person),
+                                  labelText: 'Password',
+                                  hintText: 'Password'),
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return 'Please enter password';
+                                }
+                                return value;
+                              },
+                            )
+                          : Container(),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Radio(
+                            value: 0,
+                            groupValue: userType,
+                            onChanged: _handleRadioValueChange,
+                          ),
+                          Text(
+                            'Monitor',
+                            style: Styles.blackTiny,
+                          ),
+                          Radio(
+                            value: 1,
+                            groupValue: userType,
+                            onChanged: _handleRadioValueChange,
+                          ),
+                          Text('Admin', style: Styles.blackTiny),
+                          Radio(
+                            value: 2,
+                            groupValue: userType,
+                            onChanged: _handleRadioValueChange,
+                          ),
+                          Text(
+                            'Executive',
+                            style: Styles.blackTiny,
+                          ),
+                        ],
+                      ),
+                      Text(
+                        type == null ? '' : type,
+                        style: Styles.greyLabelSmall,
+                      ),
+                      SizedBox(
+                        height: 16,
+                      ),
+                      RaisedButton(
+                        elevation: 8,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            'Submit User',
+                            style: Styles.whiteSmall,
+                          ),
+                        ),
+                        onPressed: _submit,
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
