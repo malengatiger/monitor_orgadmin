@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:monitor_orgadmin/ui/users/user_edit_main.dart';
+import 'package:monitor_orgadmin/ui/users/report/user_rpt_main.dart';
 import 'package:monitorlibrary/bloc/monitor_bloc.dart';
 import 'package:monitorlibrary/data/user.dart';
 import 'package:monitorlibrary/functions.dart';
 import 'package:page_transition/page_transition.dart';
+
+import '../edit/user_edit_main.dart';
 
 class UserListMobile extends StatefulWidget {
   final User user;
@@ -124,28 +126,51 @@ class _UserListMobileState extends State<UserListMobile>
                         itemCount: _users.length,
                         itemBuilder: (BuildContext context, int index) {
                           var user = _users.elementAt(index);
-                          return GestureDetector(
-                            onTap: () {
-                              _navigateToUserEdit(user);
-                            },
-                            child: Card(
-                              elevation: 2,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListTile(
-                                  leading: Icon(
-                                    Icons.person,
-                                    color: Theme.of(context).primaryColor,
+                          return Card(
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(
+                                      Icons.person,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    subtitle: Text(
+                                      user.email,
+                                      style: Styles.greyLabelSmall,
+                                    ),
+                                    title: Text(
+                                      user.name,
+                                      style: Styles.blackBoldSmall,
+                                    ),
                                   ),
-                                  subtitle: Text(
-                                    user.email,
-                                    style: Styles.greyLabelSmall,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.create),
+                                        onPressed: () {
+                                          _navigateToUserEdit(user);
+                                        },
+                                      ),
+                                      SizedBox(
+                                        width: 60,
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons
+                                            .report_gmailerrorred_outlined),
+                                        onPressed: () {
+                                          _navigateToUserReport(user);
+                                        },
+                                      ),
+                                      SizedBox(
+                                        width: 12,
+                                      ),
+                                    ],
                                   ),
-                                  title: Text(
-                                    user.name,
-                                    style: Styles.blackBoldSmall,
-                                  ),
-                                ),
+                                ],
                               ),
                             ),
                           );
@@ -165,5 +190,15 @@ class _UserListMobileState extends State<UserListMobile>
             alignment: Alignment.topLeft,
             duration: Duration(seconds: 1),
             child: UserEditMain(user)));
+  }
+
+  void _navigateToUserReport(User user) {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.scale,
+            alignment: Alignment.topLeft,
+            duration: Duration(seconds: 1),
+            child: UserReportMain(user)));
   }
 }

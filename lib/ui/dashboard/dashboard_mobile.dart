@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:monitor_orgadmin/ui/users/user_list_main.dart';
+import 'package:monitor_orgadmin/ui/users/list/user_list_main.dart';
 import 'package:monitorlibrary/bloc/monitor_bloc.dart';
 import 'package:monitorlibrary/bloc/theme_bloc.dart';
 import 'package:monitorlibrary/data/photo.dart';
