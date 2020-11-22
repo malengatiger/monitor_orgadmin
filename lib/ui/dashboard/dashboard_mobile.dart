@@ -110,24 +110,27 @@ class _DashboardMobileState extends State<DashboardMobile>
               crossAxisCount: 2,
               children: [
                 Container(
-                  child: Card(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 48,
-                        ),
-                        Text(
-                          '${_projects.length}',
-                          style: Styles.blackBoldLarge,
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          'Projects',
-                          style: Styles.greyLabelSmall,
-                        )
-                      ],
+                  child: GestureDetector(
+                    onTap: _navigateToProjectList,
+                    child: Card(
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 48,
+                          ),
+                          Text(
+                            '${_projects.length}',
+                            style: Styles.blackBoldLarge,
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            'Projects',
+                            style: Styles.greyLabelSmall,
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -236,6 +239,16 @@ class _DashboardMobileState extends State<DashboardMobile>
             alignment: Alignment.topLeft,
             duration: Duration(seconds: 1),
             child: UserListMain()));
+  }
+
+  void _navigateToProjectList() {
+    Navigator.push(
+        context,
+        PageTransition(
+            type: PageTransitionType.scale,
+            alignment: Alignment.topLeft,
+            duration: Duration(seconds: 1),
+            child: ProjectListMain(ORG_ADMINISTRATOR)));
   }
 
   StreamSubscription<List<Project>> projectStreamSubscription;
